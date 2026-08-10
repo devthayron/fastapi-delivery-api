@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/auth",tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
 
 @router.get("/")
 async def auth():
@@ -9,5 +10,5 @@ async def auth():
     """
     return {
         "mensagem": "você acessou a rota padão de autenticação",
-        "autenticacao": False
+        "autenticacao": False,
     }

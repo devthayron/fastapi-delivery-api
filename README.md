@@ -6,7 +6,7 @@ O objetivo é praticar o desenvolvimento de uma API backend utilizando **FastAPI
 
 Além do conteúdo apresentado no curso, estou aplicando melhorias relacionadas à organização do projeto, modularização, utilização do padrão moderno do **SQLAlchemy 2.0** e estruturação de código visando maior qualidade, organização e facilidade de manutenção.
 
-Durante o desenvolvimento, utilizo ferramentas de apoio ao aprendizado, como a **OpenAI**, para auxiliar na análise de código, entendimento de conceitos e aplicação de melhores práticas.
+O projeto também serve como prática de estudo contínuo, utilizando recursos de apoio para aprofundamento técnico e aplicação de boas práticas de desenvolvimento.
 
 ## Tecnologias
 
