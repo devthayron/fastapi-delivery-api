@@ -19,7 +19,9 @@ class Order(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     status: Mapped[OrderStatusEnum] = mapped_column(
-        SQLEnum(OrderStatusEnum, values_callable=lambda x: [e.value for e in x]),
+        SQLEnum(
+            OrderStatusEnum, values_callable=lambda x: [e.value for e in x]
+        ),  # Usa os valores definidos no Enum (ex.: "pending") em vez dos nomes (ex.: "PENDING")
         nullable=False,
         default=OrderStatusEnum.PENDING,
     )
