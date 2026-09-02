@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from dependencies import get_session
+from dependencies import get_session, password_hasher
 from models.users import User
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -24,7 +24,8 @@ async def register(email: str, password: str, name: str, session=Depends(get_ses
     if user:
         return {"mensagem": "ja existe usuario com esse email"}
 
-    user_new = User(name=name, email=email, password_hash=password)
+    hashed_password = password_hasher.hash(password)
+    user_new = User(name=name, email=email, hashed_password=hashed_password)
     session.add(user_new)
     session.commit()
     return {"mensagem": "User cadastrado"}
