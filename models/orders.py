@@ -27,7 +27,7 @@ class Order(Base):
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     price: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2), nullable=False
+        Numeric(10, 2), nullable=False, default=0.00
     )  # padrão recomendado para valores monetários, pois o tipo float pode gerar imprecisão
 
 

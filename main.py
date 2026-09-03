@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from routes.auth import router as auth_router
-from routes.order import router as order_router
+from routes.orders import router as order_router
 
 load_dotenv()
 
