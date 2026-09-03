@@ -3,9 +3,14 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_session, password_hasher
 from models.users import User
-from schemas.users import UserCreate
+from schemas.users import UserCreate, UserLogin
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+def create_token(user_id: int):
+    token = f"token_for_user_{user_id}"
+    return token
 
 
 @router.get("/")
@@ -40,3 +45,21 @@ async def register(user: UserCreate, session: Session = Depends(get_session)):  
     session.commit()
 
     return {"mensagem": f"User {user_new.email} cadastrado com sucesso!"}
+
+
+@router.post("/login")
+async def login(user: UserLogin, session: Session = Depends(get_session)):  # noqa
+    user_db = session.query(User).filter(User.email == user.email).first()
+
+    if not user_db:
+        raise HTTPException(status_code=401, detail="Usuario não encontrado")
+
+    if not password_hasher.verify(user.password, user_db.hashed_password):
+        raise HTTPException(status_code=401, detail="Usuario ou senha incorretos")
+
+    access_token = create_token(user_db.id)
+
+    return {
+        "access_token": access_token,
+        "token_type": "Bearer",
+    }

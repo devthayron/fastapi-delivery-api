@@ -9,6 +9,11 @@ class UserCreate(BaseModel):
     is_admin: bool = False
 
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
 class UserRead(BaseModel):
     id: int
     name: str
