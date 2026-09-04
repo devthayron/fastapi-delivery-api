@@ -1,8 +1,14 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from core.security import create_access_token
-from dependencies import get_session, password_hasher
+from core.security import create_token
+from dependencies import (
+    get_session,
+    password_hasher,
+    verify_refresh_token,
+)
 from models.users import User
 from schemas.users import UserCreate, UserLogin
 
@@ -59,7 +65,20 @@ async def login(credentials: UserLogin, session: Session = Depends(get_session))
     if not user:
         raise HTTPException(status_code=401, detail="Usuario ou senha incorretos")
 
-    access_token = create_access_token(user.id)
+    access_token = create_token(user.id, jwt_type="access")
+    refresh_token = create_token(user.id, timedelta(days=7), jwt_type="refresh")
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@router.get("/refresh")
+async def refresh_access_token(user_id: int = Depends(verify_refresh_token)):
+
+    access_token = create_token(user_id, jwt_type="access")
 
     return {
         "access_token": access_token,

@@ -5,13 +5,18 @@ import jwt
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
 
-def create_access_token(user_id: int):
+def create_token(
+    user_id: int,
+    expires_delta: timedelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    jwt_type: str = "access",
+):
 
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    exp = datetime.now(timezone.utc) + expires_delta
 
     payload = {
         "sub": str(user_id),
-        "exp": expire,
+        "exp": exp,
+        "type": jwt_type,
     }
 
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
