@@ -11,7 +11,7 @@ SessionLocal = sessionmaker(bind=db)
 
 password_hasher = PasswordHash.recommended()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login-oauth2")
 
 
 def get_session():
@@ -34,23 +34,15 @@ def decode_token(token: str):
         raise HTTPException(status_code=401, detail="Token inválido")
 
 
-def _validate_token(token: str, expected_type: str) -> int:
+def verify_token(token: str = Depends(oauth2_scheme)):
     payload = decode_token(token)
-
-    if payload.get("type") != expected_type:
-        raise HTTPException(status_code=401, detail="jwt_type inválido")
 
     user_id = payload.get("sub")
 
     if not user_id:
-        raise HTTPException(status_code=401, detail="Token inválido")
+        raise HTTPException(
+            status_code=401,
+            detail="Token inválido",
+        )
 
     return int(user_id)
-
-
-def verify_access_token(token: str = Depends(oauth2_scheme)):
-    return _validate_token(token, expected_type="access")
-
-
-def verify_refresh_token(token: str = Depends(oauth2_scheme)):
-    return _validate_token(token, expected_type="refresh")
