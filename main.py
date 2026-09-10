@@ -8,3 +8,8 @@ app = FastAPI()
 
 app.include_router(auth_router)
 app.include_router(order_router)
+
+
+@app.get("/")
+def root():
+    return {"mensagem": "Bem-vindo à API de autenticação e pedidos!"}
