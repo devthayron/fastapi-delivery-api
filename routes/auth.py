@@ -78,8 +78,8 @@ async def login(credentials: UserLogin, session: Session = Depends(get_session))
 
 @router.post("/login-oauth2")
 def login_oauth2(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    session: Session = Depends(get_session),
+    form_data: OAuth2PasswordRequestForm = Depends(),  # noqa: B008
+    session: Session = Depends(get_session),  # noqa: B008
 ):
     user = authenticate_user(form_data.username, form_data.password, session)
 
@@ -95,7 +95,7 @@ def login_oauth2(
 
 
 @router.get("/refresh")
-async def refresh_access_token(user: User = Depends(verify_token)):
+async def refresh_access_token(user: User = Depends(verify_token)):  # noqa: B008
     access_token = create_token(user.id)
 
     return {

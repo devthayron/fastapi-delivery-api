@@ -36,8 +36,8 @@ async def create_order(order: OrderCreate, session: Session = Depends(get_sessio
 @router.post("/cancel/{order_id}")
 async def cancel_order(
     order_id: int,
-    session: Session = Depends(get_session),
-    user: User = Depends(verify_token),
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
 ):
     """
     Essa é a rota de cancelamento de pedidos do nosso sistema
@@ -64,3 +64,18 @@ async def cancel_order(
         "mensagem": f"Pedido número {order.id} cancelado com sucesso!",
         "pedido": order,
     }
+
+
+@router.get("/list")
+async def list_order(
+    session: Session = Depends(get_session), user: User = Depends(verify_token)
+):
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa operação",
+        )
+
+    orders = session.query(Order).all()
+
+    return {"pedidos": orders}
