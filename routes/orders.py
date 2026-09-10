@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_session, verify_token
 from models.orders import Order, OrderStatusEnum
+from models.users import User
 from schemas.orders import OrderCreate
 
 router = APIRouter(
@@ -33,7 +34,11 @@ async def create_order(order: OrderCreate, session: Session = Depends(get_sessio
 
 
 @router.post("/cancel/{order_id}")
-async def cancel_order(order_id: int, session: Session = Depends(get_session)):  # noqa: B008
+async def cancel_order(
+    order_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(verify_token),
+):
     """
     Essa é a rota de cancelamento de pedidos do nosso sistema
     """
@@ -46,10 +51,16 @@ async def cancel_order(order_id: int, session: Session = Depends(get_session)): 
     if order.status == OrderStatusEnum.CANCELED:
         raise HTTPException(status_code=400, detail="Pedido já está cancelado")
 
+    if not user.is_admin and user.id != order.user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa modificação",
+        )
+
     order.status = OrderStatusEnum.CANCELED
     session.commit()
 
     return {
-        "mensagem": f"Pedido número {order_id} cancelado com sucesso!",
-        "pedido": order,  # não tá carregando pois a sessão foi cortada apos o commit
+        "mensagem": f"Pedido número {order.id} cancelado com sucesso!",
+        "pedido": order,
     }

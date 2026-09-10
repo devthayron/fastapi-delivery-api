@@ -95,9 +95,8 @@ def login_oauth2(
 
 
 @router.get("/refresh")
-async def refresh_access_token(user_id: int = Depends(verify_token)):
-
-    access_token = create_token(user_id)
+async def refresh_access_token(user: User = Depends(verify_token)):
+    access_token = create_token(user.id)
 
     return {
         "access_token": access_token,
