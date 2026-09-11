@@ -119,3 +119,36 @@ async def add_order(
         "item_id": new_order_item.id,
         "preco_pedido": order.price,
     }
+
+
+@router.post("/remove/{order_item_id}")
+async def remove_order(
+    order_item_id: int,
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
+):
+    order_item = session.query(OrderItem).filter(OrderItem.id == order_item_id).first()
+
+    order = order_item.order
+
+    if not order_item:
+        raise HTTPException(status_code=404, detail="Item do pedido inexistente!")
+
+    if not user.is_admin and user.id != order.user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa modificação",
+        )
+
+    order.items.remove(order_item)
+
+    order.calcular_preco()
+
+    session.delete(order_item)
+    session.commit()
+
+    return {
+        "mensagem": "Item removido com sucesso",
+        "preco_pedido": order.price,
+        "resumo_pedido": order,
+    }

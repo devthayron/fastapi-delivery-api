@@ -29,7 +29,9 @@ class Order(Base):
     price: Mapped[Decimal] = mapped_column(
         Numeric(10, 2), nullable=False, default=0.00
     )  # padrão recomendado para valores monetários, pois o tipo float pode gerar imprecisão
-    items = relationship("OrderItem", cascade="all, delete")
+    items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="order", cascade="all, delete"
+    )
 
     def calcular_preco(self):
         self.price = sum(item.unit_price * item.quantity for item in self.items)
@@ -44,3 +46,4 @@ class OrderItem(Base):
     size: Mapped[str] = mapped_column(nullable=False)
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    order: Mapped["Order"] = relationship(back_populates="items")
