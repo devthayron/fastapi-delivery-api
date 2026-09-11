@@ -68,7 +68,8 @@ async def cancel_order(
 
 @router.get("/list")
 async def list_order(
-    session: Session = Depends(get_session), user: User = Depends(verify_token)
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
 ):
     if not user.is_admin:
         raise HTTPException(
@@ -85,8 +86,8 @@ async def list_order(
 async def add_order(
     order_id: int,
     order_item: OrderItemCreate,
-    session: Session = Depends(get_session),
-    user: User = Depends(verify_token),
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
 ):
     order = session.query(Order).filter(Order.id == order_id).first()
 
@@ -107,9 +108,10 @@ async def add_order(
         order_id=order_id,
     )
 
+    session.add(new_order_item)
+
     order.calcular_preco()
 
-    session.add(new_order_item)
     session.commit()
 
     return {

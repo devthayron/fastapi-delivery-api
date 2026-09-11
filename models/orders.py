@@ -3,7 +3,7 @@ from enum import StrEnum
 
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, Numeric
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
 
@@ -29,9 +29,10 @@ class Order(Base):
     price: Mapped[Decimal] = mapped_column(
         Numeric(10, 2), nullable=False, default=0.00
     )  # padrão recomendado para valores monetários, pois o tipo float pode gerar imprecisão
+    items = relationship("OrderItem", cascade="all, delete")
 
     def calcular_preco(self):
-        self.price = 10
+        self.price = sum(item.unit_price * item.quantity for item in self.items)
 
 
 class OrderItem(Base):
