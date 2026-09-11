@@ -152,3 +152,73 @@ async def remove_order(
         "preco_pedido": order.price,
         "resumo_pedido": order,
     }
+
+
+@router.post("/completed/{order_id}")
+async def completed_order(
+    order_id: int,
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
+):
+    """
+    Essa é a rota de completar pedidos do nosso sistema
+    """
+
+    order = session.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado")
+
+    if order.status == OrderStatusEnum.COMPLETED:
+        raise HTTPException(status_code=400, detail="Pedido já está cancelado")
+
+    if not user.is_admin and user.id != order.user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa modificação",
+        )
+
+    order.status = OrderStatusEnum.COMPLETED
+    session.commit()
+
+    return {
+        "mensagem": f"Pedido número {order.id} finalizado com sucesso!",
+        "pedido": order,
+    }
+
+
+@router.get("/{order_id}")
+async def view_order(
+    order_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(verify_token),
+):
+    order = session.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado")
+
+    if order.status == OrderStatusEnum.COMPLETED:
+        raise HTTPException(status_code=400, detail="Pedido já está cancelado")
+
+    if not user.is_admin and user.id != order.user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa modificação",
+        )
+
+    return {
+        "quantidade_itens": len(order.items),
+        "pedidos": order,
+    }
+
+
+@router.get("/list/user_orders")
+async def list_order(
+    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(verify_token),  # noqa: B008
+):
+
+    orders = session.query(Order).filter(Order.user_id == user.id).all()
+
+    return {"pedidos": orders}
