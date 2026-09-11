@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from dependencies import get_session, verify_token
 from models.orders import Order, OrderItem, OrderStatusEnum
 from models.users import User
-from schemas.orders import OrderCreate, OrderItemCreate
+from schemas.orders import OrderCreate, OrderItemCreate, ResponseOrder
 
 router = APIRouter(
     prefix="/orders", tags=["Orders"], dependencies=[Depends(verify_token)]
@@ -213,12 +213,12 @@ async def view_order(
     }
 
 
-@router.get("/list/user_orders")
-async def list_order(
+@router.get("/list/user_orders", response_model=list[ResponseOrder])
+async def list_order_user(
     session: Session = Depends(get_session),  # noqa: B008
     user: User = Depends(verify_token),  # noqa: B008
 ):
 
     orders = session.query(Order).filter(Order.user_id == user.id).all()
 
-    return {"pedidos": orders}
+    return orders

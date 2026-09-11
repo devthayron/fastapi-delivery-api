@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class OrderCreate(BaseModel):
@@ -12,3 +12,14 @@ class OrderItemCreate(BaseModel):
     flavor: str
     size: str
     unit_price: Decimal
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResponseOrder(BaseModel):
+    id: int
+    status: str
+    price: Decimal
+    items: list[OrderItemCreate]
+
+    model_config = ConfigDict(from_attributes=True)
