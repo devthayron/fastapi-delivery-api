@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import StrEnum
 
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Numeric, String
+from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.base import Base
@@ -30,11 +30,14 @@ class Order(Base):
         Numeric(10, 2), nullable=False, default=0.00
     )  # padrão recomendado para valores monetários, pois o tipo float pode gerar imprecisão
 
+    def calcular_preco(self):
+        self.price = 10
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id: Mapped[int] = mapped_column(String(36), primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     quantity: Mapped[int] = mapped_column(nullable=False)
     flavor: Mapped[str] = mapped_column(nullable=False)
     size: Mapped[str] = mapped_column(nullable=False)

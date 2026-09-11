@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from dependencies import get_session, verify_token
-from models.orders import Order, OrderStatusEnum
+from models.orders import Order, OrderItem, OrderStatusEnum
 from models.users import User
-from schemas.orders import OrderCreate
+from schemas.orders import OrderCreate, OrderItemCreate
 
 router = APIRouter(
     prefix="/orders", tags=["Orders"], dependencies=[Depends(verify_token)]
@@ -79,3 +79,41 @@ async def list_order(
     orders = session.query(Order).all()
 
     return {"pedidos": orders}
+
+
+@router.post("/add/{order_id}")
+async def add_order(
+    order_id: int,
+    order_item: OrderItemCreate,
+    session: Session = Depends(get_session),
+    user: User = Depends(verify_token),
+):
+    order = session.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido inexistente!")
+
+    if not user.is_admin and user.id != order.user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Você não tem autorização para fazer essa modificação",
+        )
+
+    new_order_item = OrderItem(
+        quantity=order_item.quantity,
+        flavor=order_item.flavor,
+        size=order_item.size,
+        unit_price=order_item.unit_price,
+        order_id=order_id,
+    )
+
+    order.calcular_preco()
+
+    session.add(new_order_item)
+    session.commit()
+
+    return {
+        "mensagem": "Item criado com sucesso",
+        "item_id": new_order_item.id,
+        "preco_pedido": order.price,
+    }
